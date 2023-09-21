@@ -5,6 +5,9 @@
 
 // http://www.count-zero.ru/2016/attiny13/
 
+#include <OneWire.h>
+OneWire iButton(10); // создаём объект 1-wire на 10 выводе
+
 volatile uint8_t i;
 ISR (WDT_vect) {
  if ((++i%64) == 0)
@@ -16,7 +19,9 @@ ISR (WDT_vect) {
 }
 
 int main() {
-
+byte addr[8];
+byte t[8];
+byte r;
         DDRB = (1<<PB3); // на этом пине висит светодиод
         i=0;
 
@@ -28,10 +33,22 @@ int main() {
 
         set_sleep_mode(SLEEP_MODE_PWR_DOWN); // если спать - то на полную
         while(1) {
+			r = 0;
+			if ( iButton.search(addr) ) {
+			for(int j=0; j<8; j++) 
+			if (!addr[j]==t[j]){
+			 r+=1;	
+			}
+			if (r==0){
+				OK
+			}
+			iButton.reset();
+			}
                 sleep_enable(); // разрешаем сон
                 sleep_cpu(); // спать!
         }
 }
+/*
 https://4pda.to/forum/index.php?showtopic=953401&st=420
 https://soltau.ru/index.php/arduino/item/394-kak-sdelat-kopiyu-klyucha-dlya-domofona-v-domashnikh-usloviyakh
 #include <OneWire.h>
@@ -58,3 +75,4 @@ void loop(void) {
   Serial.println();
   iButton.reset(); // сброс ключа
 }
+*/
